@@ -11,22 +11,22 @@ import { axisBottom, axisLeft } from "d3-axis";
 const width = 500;
 const height = 300;
 const padding = 50;
-const margin = 0;
 
-//Creación de la tarjeta
+//Create the card
 
 const card = select("#root")
   .append("div")
     .attr("class", "card");
 
-//Zona donde vamos a pintar
+//Where we are going to "paint"
 
 const svg = card
     .append("svg")
       .attr("width", "100%")
       .attr("height", "100%")
       .attr("viewBox", `${-padding} ${-padding} ${width + 2*padding} ${height + 2*padding}`);
-
+      
+//The yScale, extent is used for maximum and mimimum
 const yScale = scaleLinear()
   .range([height, 0])
   .domain(extent(avgTemp))
@@ -35,10 +35,35 @@ const xScale = scaleBand()
   .domain(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"])
   .range([0,width])
 
-const barGroup = svg
-    .append('g');
+// We are going to use a scale color for the bar chart. This is the reason why we use gradients here. See the documentation 
+//for more information
+const gradient = svg
+    .append("defs")
+      .append("linearGradient")
+        .attr("id", "barGradient")
+        .attr("gradientUnits", "userSpaceOnUse")
+        .attr("x1", "0")
+        .attr("y1", height)
+        .attr("x2", "0")
+        .attr("y2", "0");
+gradient
+    .append("stop")
+      .attr("offset", "0")
+      .attr("stop-color", "#185a9d");
+gradient
+    .append("stop")
+      .attr("offset", "50%")
+      .attr("stop-color", "#ff9900");
+gradient
+    .append("stop")
+      .attr("offset", "100%")
+      .attr("stop-color", "#dc3912");
 
-// Very basic barGroup
+
+const barGroup = svg
+  .append('g');
+
+// Painting the bar chart
 barGroup
   .selectAll('rect')
   .data(avgTemp)
@@ -51,23 +76,21 @@ barGroup
     //.attr("width", width / avgTemp.length  )
     .attr("width", xScale.bandwidth()  )
     .attr("height", (d) => height - yScale(d) )
-    .attr("fill", function(d) {
-      return "rgb(178, " + (+255- 8*d) + ", 0)";
-      })
+    .attr("fill", "url(#barGradient)");
     ;
 
-//Añadir eje yclc
+//add x
 barGroup.append('g')
   .attr('transform', `translate(0, ${height})`)
   .call(axisBottom(xScale));
 
-//Añadir eje y
+//Add y
 barGroup.append('g')
     .call(axisLeft(yScale));
 
-//Añadir Texto (Comentario eje x e y)
+//Comments, firstly y and later x
 svg.append('text')
-    .attr('x', -(height / 2) - margin)//(height / 2) - margin
+    .attr('x', -(height / 2) )//(height / 2) - margin
     .attr('y', -padding/2)
     .attr('transform', 'rotate(-90)')
     .attr('text-anchor', 'middle')
@@ -75,7 +98,6 @@ svg.append('text')
 
 svg.append('text')
     .attr('x', width / 2 )
-    .attr('y', -padding/2)
+    .attr('y', height + padding)
     .attr('text-anchor', 'middle')
-    .text('Month')
-
+    .text('Months')
