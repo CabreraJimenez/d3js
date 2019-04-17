@@ -8,5 +8,4 @@ const card = select("#root")
 // This card will contain a title for our visualization.
 card
   .append("h1")
-    .text("Bar Map.js");
-
+    .text("Barplot");
